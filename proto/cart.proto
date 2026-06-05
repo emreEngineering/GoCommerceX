@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package cart.v1;
+
+option go_package = "GoCommerceX/proto/cart/v1;cartv1";
+
+service CartService {}

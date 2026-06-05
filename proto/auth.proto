@@ -1,0 +1,7 @@
+syntax = "proto3"; //Bu dosyanın Protocol Buffers sürüm 3 formatını kullandığını söyler.
+
+package auth.v1;
+
+option go_package = "GoCommerceX/proto/auth/v1;authv1";
+
+service AuthService {}

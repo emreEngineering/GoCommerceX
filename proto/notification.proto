@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package notification.v1;
+
+option go_package = "GoCommerceX/proto/notification/v1;notificationv1";
+
+service NotificationService {}
