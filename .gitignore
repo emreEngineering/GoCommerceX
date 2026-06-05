@@ -1,0 +1,33 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Go build artifacts
+bin/
+dist/
+*.exe
+*.test
+*.out
+
+# Go workspace/cache
+go.work
+go.work.sum
+
+# Coverage
+coverage.out
+coverage.html
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+
+# Docker local overrides
+docker-compose.override.yml
