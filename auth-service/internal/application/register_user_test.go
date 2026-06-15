@@ -46,8 +46,9 @@ func (r *fakeUserRepository) FindByEmail(ctx context.Context, email string) (dom
 }
 
 type fakePasswordHasher struct {
-	hashValue string
-	hashErr   error
+	hashValue  string
+	hashErr    error
+	compareErr error
 }
 
 func (h fakePasswordHasher) Hash(ctx context.Context, plainPassword string) (string, error) {
@@ -59,7 +60,7 @@ func (h fakePasswordHasher) Hash(ctx context.Context, plainPassword string) (str
 }
 
 func (h fakePasswordHasher) Compare(ctx context.Context, plainPassword string, passwordHash string) error {
-	return nil
+	return h.compareErr
 }
 
 func TestRegisterUserUseCaseExecute(t *testing.T) {
