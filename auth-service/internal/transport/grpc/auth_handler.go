@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"errors"
+	"log"
 
 	"GoCommerceX/auth-service/internal/application"
 	"GoCommerceX/proto/auth/v1"
@@ -40,6 +41,7 @@ func (h *AuthHandler) Register(ctx context.Context, req *authv1.RegisterRequest)
 		case errors.Is(err, application.ErrUserAlreadyExists):
 			return nil, status.Error(codes.AlreadyExists, err.Error())
 		default:
+			log.Printf("Register error: %v", err)
 			return nil, status.Error(codes.Internal, "internal error")
 		}
 	}
@@ -66,6 +68,7 @@ func (h *AuthHandler) Login(ctx context.Context, req *authv1.LoginRequest) (*aut
 		case errors.Is(err, application.ErrInvalidCredentials):
 			return nil, status.Error(codes.Unauthenticated, err.Error())
 		default:
+			log.Printf("Login error: %v", err)
 			return nil, status.Error(codes.Internal, "internal error")
 		}
 	}

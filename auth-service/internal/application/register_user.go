@@ -1,22 +1,33 @@
 package application
 
 import (
-	"GoCommerceX/auth-service/internal/domain"
-	"GoCommerceX/auth-service/internal/ports"
 	"context"
 	"errors"
 	"strings"
-	"time"
+
+	"GoCommerceX/auth-service/internal/domain"
+	"GoCommerceX/auth-service/internal/ports"
 )
 
 var (
-	ErrRegisterEmailRequired    = errors.New("email is required")
-	ErrRegisterPasswordRequired = errors.New("password is required")
-	ErrUserAlreadyExists        = errors.New("user already exists")
+	ErrRegisterEmailRequired    = errors.New("register: email is required")
+	ErrRegisterPasswordRequired = errors.New("register: password is required")
+	ErrUserAlreadyExists        = errors.New("register: user already exists")
 )
 
+type RegisterUserUseCase struct {
+	userRepo       ports.UserRepository
+	passwordHasher ports.PasswordHasher
+}
+
+func NewRegisterUserUseCase(userRepo ports.UserRepository, passwordHasher ports.PasswordHasher) *RegisterUserUseCase {
+	return &RegisterUserUseCase{
+		userRepo:       userRepo,
+		passwordHasher: passwordHasher,
+	}
+}
+
 type RegisterUserInput struct {
-	ID       string
 	Email    string
 	Password string
 }
@@ -26,54 +37,37 @@ type RegisterUserOutput struct {
 	Email  string
 }
 
-type RegisterUserUseCase struct {
-	userRepository ports.UserRepository
-	passwordHasher ports.PasswordHasher
-}
-
-func NewRegisterUserUseCase(userRepository ports.UserRepository, passwordHasher ports.PasswordHasher) RegisterUserUseCase {
-	return RegisterUserUseCase{
-		userRepository: userRepository,
-		passwordHasher: passwordHasher,
-	}
-}
-
-func (uc RegisterUserUseCase) Execute(ctx context.Context, input RegisterUserInput) (RegisterUserOutput, error) {
+func (uc *RegisterUserUseCase) Execute(ctx context.Context, input RegisterUserInput) (RegisterUserOutput, error) {
 	email := strings.TrimSpace(input.Email)
 	password := strings.TrimSpace(input.Password)
 
 	if email == "" {
 		return RegisterUserOutput{}, ErrRegisterEmailRequired
 	}
-
 	if password == "" {
 		return RegisterUserOutput{}, ErrRegisterPasswordRequired
 	}
 
-	existingUser, err := uc.userRepository.FindByEmail(ctx, email)
-	if err == nil && existingUser.ID != "" {
+	// check existing user
+	_, err := uc.userRepo.FindByEmail(ctx, email)
+	if err == nil {
 		return RegisterUserOutput{}, ErrUserAlreadyExists
 	}
-	passwordHash, err := uc.passwordHasher.Hash(ctx, password)
+	if !errors.Is(err, ports.ErrUserNotFound) {
+		return RegisterUserOutput{}, err
+	}
+
+	hashedPassword, err := uc.passwordHasher.Hash(ctx, password)
 	if err != nil {
 		return RegisterUserOutput{}, err
 	}
 
-	now := time.Now().UTC()
-
-	user := domain.User{
-		ID:           strings.TrimSpace(input.ID),
-		Email:        email,
-		PasswordHash: passwordHash,
-		CreatedAt:    now,
-		UpdatedAt:    now,
-	}
-
+	user := domain.NewUser(email, hashedPassword)
 	if err := user.Validate(); err != nil {
 		return RegisterUserOutput{}, err
 	}
 
-	if err := uc.userRepository.Save(ctx, user); err != nil {
+	if err := uc.userRepo.Save(ctx, user); err != nil {
 		return RegisterUserOutput{}, err
 	}
 

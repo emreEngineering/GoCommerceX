@@ -2,14 +2,15 @@ package domain
 
 import (
 	"errors"
-	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 var (
-	ErrUserIDRequired       = errors.New("user id is required")
-	ErrUserEmailRequired    = errors.New("user email is required")
-	ErrPasswordHashRequired = errors.New("password hash is required")
+	ErrUserIDRequired       = errors.New("user: id is required")
+	ErrUserEmailRequired    = errors.New("user: email is required")
+	ErrPasswordHashRequired = errors.New("user: password hash is required")
 )
 
 type User struct {
@@ -20,18 +21,26 @@ type User struct {
 	UpdatedAt    time.Time
 }
 
+func NewUser(email, passwordHash string) User {
+	now := time.Now()
+	return User{
+		ID:           uuid.NewString(),
+		Email:        email,
+		PasswordHash: passwordHash,
+		CreatedAt:    now,
+		UpdatedAt:    now,
+	}
+}
+
 func (u User) Validate() error {
-	if strings.TrimSpace(u.ID) == "" {
+	if u.ID == "" {
 		return ErrUserIDRequired
 	}
-
-	if strings.TrimSpace(u.Email) == "" {
+	if u.Email == "" {
 		return ErrUserEmailRequired
 	}
-
-	if strings.TrimSpace(u.PasswordHash) == "" {
+	if u.PasswordHash == "" {
 		return ErrPasswordHashRequired
 	}
-
 	return nil
 }

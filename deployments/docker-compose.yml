@@ -3,15 +3,15 @@ services:
     image: postgres:16-alpine
     container_name: gocommerce-postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-gocommerce}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gocommerce_password}
-      POSTGRES_DB: ${POSTGRES_DB:-gocommerce}
+      POSTGRES_USER: gocommerce
+      POSTGRES_PASSWORD: gocommerce_password
+      POSTGRES_DB: gocommerce
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U gocommerce -d gocommerce"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -20,7 +20,7 @@ services:
     image: redis:7-alpine
     container_name: gocommerce-redis
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -33,11 +33,11 @@ services:
     image: rabbitmq:3-management-alpine
     container_name: gocommerce-rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-gocommerce}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-gocommerce_password}
+      RABBITMQ_DEFAULT_USER: gocommerce
+      RABBITMQ_DEFAULT_PASS: gocommerce_password
     ports:
-      - "${RABBITMQ_AMQP_PORT:-5672}:5672"
-      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+      - "5672:5672"
+      - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
