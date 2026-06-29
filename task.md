@@ -35,6 +35,7 @@ Kapsanan konular:
 | **Auth Service** | ✅ Çalışıyor | 50051 | `phase-02.12-auth-service-runnable` |
 | **User Service** | ✅ Çalışıyor | 50052 | `phase-03.01-user-service-runnable` |
 | **Product Service** | ✅ Geliştirildi | 50053 | - |
+| **Inventory Service** | ✅ Geliştirildi | 50054 | - |
 
 ### Auth Service Detay
 - **Metodlar:** Register, Login
@@ -55,10 +56,10 @@ Kapsanan konular:
 ### Altyapı
 - **Docker Compose:** PostgreSQL (5432), Redis (6379), RabbitMQ (5672, 15672)
 - **Veritabanı:** PostgreSQL, kullanıcı: `gocommerce`, şifre: `gocommerce_password`, db: `gocommerce`
-- **Proto tanımları:** 8 `.proto` dosyası var, sadece `auth.proto` ve `user.proto` için Go kodu üretildi.
+- **Proto tanımları:** 9 `.proto` dosyası var, `auth.proto`, `user.proto`, `product.proto` ve `inventory.proto` için Go kodu üretildi.
 
 ### Bekleyen Servisler
-- Inventory, Cart, Order, Payment, Notification, API Gateway (sadece boş klasörler var)
+- Cart, Order, Payment, Notification, API Gateway (sadece boş klasörler var)
 
 ---
 
@@ -118,4 +119,4 @@ GoCommerceX/
 ## 7. Yeni Konuşma Başlatma Komutu
 
 > GoCommerceX projesine devam et. `task.md` dosyasını oku, `main` branch'teyiz.
-> Auth Service (50051), User Service (50052) ve Product Service (50053) hazır. Auth register akışı artık User Service'e gRPC çağrısı yapıyor. Sıradaki adım Inventory Service.
+> Auth Service (50051), User Service (50052), Product Service (50053) ve Inventory Service (50054) hazır. Auth register akışı artık User Service'e gRPC çağrısı yapıyor. Sıradaki adım Cart Service.

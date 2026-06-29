@@ -4,4 +4,81 @@ package inventory.v1;
 
 option go_package = "GoCommerceX/proto/inventory/v1;inventoryv1";
 
-service InventoryService {}
+service InventoryService {
+  rpc CreateInventory(CreateInventoryRequest) returns (CreateInventoryResponse);
+  rpc GetInventory(GetInventoryRequest) returns (GetInventoryResponse);
+  rpc GetInventoryByProductID(GetInventoryByProductIDRequest) returns (GetInventoryByProductIDResponse);
+  rpc AdjustStock(AdjustStockRequest) returns (AdjustStockResponse);
+  rpc ReserveStock(ReserveStockRequest) returns (ReserveStockResponse);
+  rpc ReleaseStock(ReleaseStockRequest) returns (ReleaseStockResponse);
+  rpc DeleteInventory(DeleteInventoryRequest) returns (DeleteInventoryResponse);
+}
+
+message Inventory {
+  string id = 1;
+  string product_id = 2;
+  int32 available_quantity = 3;
+  int32 reserved_quantity = 4;
+  string created_at = 5;
+  string updated_at = 6;
+}
+
+message CreateInventoryRequest {
+  string product_id = 1;
+  int32 available_quantity = 2;
+}
+
+message CreateInventoryResponse {
+  Inventory inventory = 1;
+}
+
+message GetInventoryRequest {
+  string id = 1;
+}
+
+message GetInventoryResponse {
+  Inventory inventory = 1;
+}
+
+message GetInventoryByProductIDRequest {
+  string product_id = 1;
+}
+
+message GetInventoryByProductIDResponse {
+  Inventory inventory = 1;
+}
+
+message AdjustStockRequest {
+  string id = 1;
+  int32 delta = 2;
+}
+
+message AdjustStockResponse {
+  Inventory inventory = 1;
+}
+
+message ReserveStockRequest {
+  string id = 1;
+  int32 quantity = 2;
+}
+
+message ReserveStockResponse {
+  Inventory inventory = 1;
+}
+
+message ReleaseStockRequest {
+  string id = 1;
+  int32 quantity = 2;
+}
+
+message ReleaseStockResponse {
+  Inventory inventory = 1;
+}
+
+message DeleteInventoryRequest {
+  string id = 1;
+}
+
+message DeleteInventoryResponse {
+  bool success = 1;
+}
