@@ -27,8 +27,11 @@ func NewAuthHandler(registerUseCase *application.RegisterUserUseCase, loginUseCa
 
 func (h *AuthHandler) Register(ctx context.Context, req *authv1.RegisterRequest) (*authv1.RegisterResponse, error) {
 	input := application.RegisterUserInput{
-		Email:    req.GetEmail(),
-		Password: req.GetPassword(),
+		Email:     req.GetEmail(),
+		Password:  req.GetPassword(),
+		FirstName: req.GetFirstName(),
+		LastName:  req.GetLastName(),
+		Phone:     req.GetPhone(),
 	}
 
 	output, err := h.registerUseCase.Execute(ctx, input)
@@ -38,8 +41,16 @@ func (h *AuthHandler) Register(ctx context.Context, req *authv1.RegisterRequest)
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		case errors.Is(err, application.ErrRegisterPasswordRequired):
 			return nil, status.Error(codes.InvalidArgument, err.Error())
+		case errors.Is(err, application.ErrRegisterFirstNameRequired):
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		case errors.Is(err, application.ErrRegisterLastNameRequired):
+			return nil, status.Error(codes.InvalidArgument, err.Error())
 		case errors.Is(err, application.ErrUserAlreadyExists):
 			return nil, status.Error(codes.AlreadyExists, err.Error())
+		case errors.Is(err, application.ErrUserProfileAlreadyExists):
+			return nil, status.Error(codes.AlreadyExists, err.Error())
+		case errors.Is(err, application.ErrUserProfileCreationFailed):
+			return nil, status.Error(codes.Internal, err.Error())
 		default:
 			log.Printf("Register error: %v", err)
 			return nil, status.Error(codes.Internal, "internal error")

@@ -56,3 +56,18 @@ func (r *PostgresUserRepository) FindByEmail(ctx context.Context, email string) 
 	}
 	return user, nil
 }
+
+func (r *PostgresUserRepository) Delete(ctx context.Context, id string) error {
+	query := `
+		DELETE FROM "users"
+		WHERE id = $1
+	`
+	result, err := r.pool.Exec(ctx, query, id)
+	if err != nil {
+		return err
+	}
+	if result.RowsAffected() == 0 {
+		return ports.ErrUserNotFound
+	}
+	return nil
+}

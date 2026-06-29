@@ -12,9 +12,11 @@ import (
 	"GoCommerceX/auth-service/internal/infrastructure"
 	grpchandler "GoCommerceX/auth-service/internal/transport/grpc"
 	"GoCommerceX/proto/auth/v1"
+	userv1 "GoCommerceX/proto/user/v1"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -46,12 +48,22 @@ func main() {
 		log.Fatalf("Migration failed: %v", err)
 	}
 
+	userServiceConn, err := grpc.NewClient(
+		cfg.UserServiceAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		log.Fatalf("unable to connect to user service: %v", err)
+	}
+	defer userServiceConn.Close()
+
 	// Bağımlılıkları oluştur
 	userRepo := adapters.NewPostgresUserRepository(pool)
 	passwordHasher := adapters.NewBcryptPasswordHasher()
 	tokenGenerator := adapters.NewJWTTokenGenerator(cfg.JWTSecret)
+	userServiceClient := adapters.NewUserServiceClient(userv1.NewUserServiceClient(userServiceConn))
 
-	registerUseCase := application.NewRegisterUserUseCase(userRepo, passwordHasher)
+	registerUseCase := application.NewRegisterUserUseCase(userRepo, passwordHasher, userServiceClient)
 	loginUseCase := application.NewLoginUserUseCase(userRepo, passwordHasher, tokenGenerator)
 
 	// gRPC handler'ı oluştur

@@ -10,10 +10,12 @@ import (
 )
 
 type fakeUserRepository struct {
-	usersByEmail map[string]domain.User
-	savedUser    domain.User
-	saveErr      error
-	findErr      error
+	usersByEmail  map[string]domain.User
+	savedUser     domain.User
+	deletedUserID string
+	saveErr       error
+	findErr       error
+	deleteErr     error
 }
 
 func newFakeUserRepository() *fakeUserRepository {
@@ -30,6 +32,16 @@ func (r *fakeUserRepository) Save(ctx context.Context, user domain.User) error {
 	r.savedUser = user
 	r.usersByEmail[user.Email] = user
 
+	return nil
+}
+
+func (r *fakeUserRepository) Delete(ctx context.Context, id string) error {
+	if r.deleteErr != nil {
+		return r.deleteErr
+	}
+
+	r.deletedUserID = id
+	delete(r.usersByEmail, id)
 	return nil
 }
 
@@ -64,19 +76,35 @@ func (h fakePasswordHasher) Compare(ctx context.Context, plainPassword string, p
 	return h.compareErr
 }
 
+type fakeUserProfileCreator struct {
+	createErr error
+	created   ports.UserProfile
+	called    bool
+}
+
+func (c *fakeUserProfileCreator) Create(ctx context.Context, profile ports.UserProfile) error {
+	c.called = true
+	c.created = profile
+	return c.createErr
+}
+
 func TestRegisterUserUseCaseExecute(t *testing.T) {
 	t.Run("registers user successfully", func(t *testing.T) {
 		repository := newFakeUserRepository()
 		hasher := fakePasswordHasher{
 			hashValue: "hashed-password",
 		}
+		profileCreator := &fakeUserProfileCreator{}
 
-		useCase := NewRegisterUserUseCase(repository, hasher)
+		useCase := NewRegisterUserUseCase(repository, hasher, profileCreator)
 
 		output, err := useCase.Execute(context.Background(), RegisterUserInput{
-			ID:       "user-1",
-			Email:    " user@example.com ",
-			Password: " secret-password ",
+			ID:        "user-1",
+			Email:     " user@example.com ",
+			Password:  " secret-password ",
+			FirstName: " Emre ",
+			LastName:  " Developer ",
+			Phone:     " 555-0100 ",
 		})
 
 		if err != nil {
@@ -94,17 +122,28 @@ func TestRegisterUserUseCaseExecute(t *testing.T) {
 		if repository.savedUser.PasswordHash != "hashed-password" {
 			t.Fatalf("expected saved password hash, got %s", repository.savedUser.PasswordHash)
 		}
+
+		if !profileCreator.called {
+			t.Fatalf("expected user profile creator to be called")
+		}
+
+		if profileCreator.created.ID != "user-1" {
+			t.Fatalf("expected profile id user-1, got %s", profileCreator.created.ID)
+		}
 	})
 
 	t.Run("returns error when email is missing", func(t *testing.T) {
 		repository := newFakeUserRepository()
 		hasher := fakePasswordHasher{hashValue: "hashed-password"}
+		profileCreator := &fakeUserProfileCreator{}
 
-		useCase := NewRegisterUserUseCase(repository, hasher)
+		useCase := NewRegisterUserUseCase(repository, hasher, profileCreator)
 
 		_, err := useCase.Execute(context.Background(), RegisterUserInput{
-			ID:       "user-1",
-			Password: "secret-password",
+			ID:        "user-1",
+			Password:  "secret-password",
+			FirstName: "Emre",
+			LastName:  "Developer",
 		})
 
 		if !errors.Is(err, ErrRegisterEmailRequired) {
@@ -115,12 +154,15 @@ func TestRegisterUserUseCaseExecute(t *testing.T) {
 	t.Run("returns error when password is missing", func(t *testing.T) {
 		repository := newFakeUserRepository()
 		hasher := fakePasswordHasher{hashValue: "hashed-password"}
+		profileCreator := &fakeUserProfileCreator{}
 
-		useCase := NewRegisterUserUseCase(repository, hasher)
+		useCase := NewRegisterUserUseCase(repository, hasher, profileCreator)
 
 		_, err := useCase.Execute(context.Background(), RegisterUserInput{
-			ID:    "user-1",
-			Email: "user@example.com",
+			ID:        "user-1",
+			Email:     "user@example.com",
+			FirstName: "Emre",
+			LastName:  "Developer",
 		})
 
 		if !errors.Is(err, ErrRegisterPasswordRequired) {
@@ -137,13 +179,16 @@ func TestRegisterUserUseCaseExecute(t *testing.T) {
 		}
 
 		hasher := fakePasswordHasher{hashValue: "hashed-password"}
+		profileCreator := &fakeUserProfileCreator{}
 
-		useCase := NewRegisterUserUseCase(repository, hasher)
+		useCase := NewRegisterUserUseCase(repository, hasher, profileCreator)
 
 		_, err := useCase.Execute(context.Background(), RegisterUserInput{
-			ID:       "user-1",
-			Email:    "user@example.com",
-			Password: "secret-password",
+			ID:        "user-1",
+			Email:     "user@example.com",
+			Password:  "secret-password",
+			FirstName: "Emre",
+			LastName:  "Developer",
 		})
 
 		if !errors.Is(err, ErrUserAlreadyExists) {
@@ -154,17 +199,20 @@ func TestRegisterUserUseCaseExecute(t *testing.T) {
 	t.Run("returns error when password hashing fails", func(t *testing.T) {
 		repository := newFakeUserRepository()
 		hashErr := errors.New("hash failed")
+		profileCreator := &fakeUserProfileCreator{}
 
 		hasher := fakePasswordHasher{
 			hashErr: hashErr,
 		}
 
-		useCase := NewRegisterUserUseCase(repository, hasher)
+		useCase := NewRegisterUserUseCase(repository, hasher, profileCreator)
 
 		_, err := useCase.Execute(context.Background(), RegisterUserInput{
-			ID:       "user-1",
-			Email:    "user@example.com",
-			Password: "secret-password",
+			ID:        "user-1",
+			Email:     "user@example.com",
+			Password:  "secret-password",
+			FirstName: "Emre",
+			LastName:  "Developer",
 		})
 
 		if !errors.Is(err, hashErr) {
@@ -181,17 +229,40 @@ func TestRegisterUserUseCaseExecute(t *testing.T) {
 		hasher := fakePasswordHasher{
 			hashValue: "hashed-password",
 		}
+		profileCreator := &fakeUserProfileCreator{}
 
-		useCase := NewRegisterUserUseCase(repository, hasher)
+		useCase := NewRegisterUserUseCase(repository, hasher, profileCreator)
 
 		_, err := useCase.Execute(context.Background(), RegisterUserInput{
-			ID:       "user-1",
-			Email:    "user@example.com",
-			Password: "secret-password",
+			ID:        "user-1",
+			Email:     "user@example.com",
+			Password:  "secret-password",
+			FirstName: "Emre",
+			LastName:  "Developer",
 		})
 
 		if !errors.Is(err, saveErr) {
 			t.Fatalf("expected error %v, got %v", saveErr, err)
+		}
+	})
+
+	t.Run("returns error when profile creation fails", func(t *testing.T) {
+		repository := newFakeUserRepository()
+		hasher := fakePasswordHasher{hashValue: "hashed-password"}
+		profileCreator := &fakeUserProfileCreator{createErr: errors.New("profile create failed")}
+
+		useCase := NewRegisterUserUseCase(repository, hasher, profileCreator)
+
+		_, err := useCase.Execute(context.Background(), RegisterUserInput{
+			ID:        "user-1",
+			Email:     "user@example.com",
+			Password:  "secret-password",
+			FirstName: "Emre",
+			LastName:  "Developer",
+		})
+
+		if !errors.Is(err, ErrUserProfileCreationFailed) {
+			t.Fatalf("expected error %v, got %v", ErrUserProfileCreationFailed, err)
 		}
 	})
 }

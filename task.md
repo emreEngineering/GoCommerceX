@@ -42,6 +42,8 @@ Kapsanan konular:
 - **Ports:** `UserRepository`, `PasswordHasher`, `TokenGenerator`
 - **Adapters:** PostgreSQL (`pgx`), bcrypt, JWT
 - **Tablo:** `auth-service` → `users` (id, email, password_hash, created_at, updated_at)
+- **Not:** Register akışı, kullanıcı parolası kaydından sonra `User Service`'e gRPC ile profil oluşturma çağrısı yapar.
+- **Register girdisi:** `email`, `password`, `first_name`, `last_name`, `phone`
 
 ### User Service Detay
 - **Metodlar:** CreateUser, GetUser, GetUserByEmail, UpdateUser, DeleteUser
@@ -106,15 +108,14 @@ GoCommerceX/
 
 ## 6. Sıradaki Adımlar (Önerilen)
 
-1. Servisler arası iletişim (Auth → User gRPC çağrısı)
-2. Inventory Service (stok)
-3. Cart Service (Redis ile sepet)
-4. Order + Payment + Notification (sipariş akışı)
-5. API Gateway
+1. Inventory Service (stok)
+2. Cart Service (Redis ile sepet)
+3. Order + Payment + Notification (sipariş akışı)
+4. API Gateway
 
 ---
 
 ## 7. Yeni Konuşma Başlatma Komutu
 
 > GoCommerceX projesine devam et. `task.md` dosyasını oku, `main` branch'teyiz.
-> Auth Service (50051), User Service (50052) ve Product Service (50053) hazır. Sıradaki adım servisler arası iletişim.
+> Auth Service (50051), User Service (50052) ve Product Service (50053) hazır. Auth register akışı artık User Service'e gRPC çağrısı yapıyor. Sıradaki adım Inventory Service.

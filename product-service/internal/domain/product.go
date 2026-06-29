@@ -9,11 +9,11 @@ import (
 )
 
 var (
-	ErrProductIDRequired    = errors.New("product: id is required")
-	ErrProductSKURequired   = errors.New("product: sku is required")
-	ErrProductNameRequired  = errors.New("product: name is required")
-	ErrProductPriceInvalid  = errors.New("product: price must be zero or greater")
-	ErrProductStockInvalid  = errors.New("product: stock must be zero or greater")
+	ErrProductIDRequired   = errors.New("product: id is required")
+	ErrProductSKURequired  = errors.New("product: sku is required")
+	ErrProductNameRequired = errors.New("product: name is required")
+	ErrProductPriceInvalid = errors.New("product: price must be zero or greater")
+	ErrProductStockInvalid = errors.New("product: stock must be zero or greater")
 )
 
 type Product struct {

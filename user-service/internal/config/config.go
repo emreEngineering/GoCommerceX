@@ -3,12 +3,12 @@ package config
 import "os"
 
 type Config struct {
-	GRPCPort string
-	DBHost   string
-	DBPort   string
-	DBUser   string
+	GRPCPort   string
+	DBHost     string
+	DBPort     string
+	DBUser     string
 	DBPassword string
-	DBName   string
+	DBName     string
 }
 
 func Load() *Config {

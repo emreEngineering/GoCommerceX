@@ -11,10 +11,10 @@ import (
 
 var (
 	ErrUpdateProductIDRequired   = errors.New("update product: id is required")
-	ErrUpdateProductNameRequired  = errors.New("update product: name is required")
-	ErrUpdateProductPriceInvalid  = errors.New("update product: price must be zero or greater")
-	ErrUpdateProductStockInvalid  = errors.New("update product: stock must be zero or greater")
-	ErrDeleteProductIDRequired    = errors.New("delete product: id is required")
+	ErrUpdateProductNameRequired = errors.New("update product: name is required")
+	ErrUpdateProductPriceInvalid = errors.New("update product: price must be zero or greater")
+	ErrUpdateProductStockInvalid = errors.New("update product: stock must be zero or greater")
+	ErrDeleteProductIDRequired   = errors.New("delete product: id is required")
 )
 
 type UpdateProductInput struct {

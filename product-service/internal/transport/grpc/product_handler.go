@@ -16,11 +16,11 @@ import (
 
 type ProductHandler struct {
 	productv1.UnimplementedProductServiceServer
-	createProductUseCase    *application.CreateProductUseCase
-	getProductUseCase       *application.GetProductUseCase
-	getProductBySKUUseCase  *application.GetProductBySKUUseCase
-	updateProductUseCase    *application.UpdateProductUseCase
-	deleteProductUseCase    *application.DeleteProductUseCase
+	createProductUseCase   *application.CreateProductUseCase
+	getProductUseCase      *application.GetProductUseCase
+	getProductBySKUUseCase *application.GetProductBySKUUseCase
+	updateProductUseCase   *application.UpdateProductUseCase
+	deleteProductUseCase   *application.DeleteProductUseCase
 }
 
 func NewProductHandler(

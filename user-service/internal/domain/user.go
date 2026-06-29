@@ -25,10 +25,13 @@ type User struct {
 	UpdatedAt time.Time
 }
 
-func NewUser(email, firstName, lastName, phone string) User {
+func NewUser(id, email, firstName, lastName, phone string) User {
 	now := time.Now()
+	if strings.TrimSpace(id) == "" {
+		id = uuid.NewString()
+	}
 	return User{
-		ID:        uuid.NewString(),
+		ID:        strings.TrimSpace(id),
 		Email:     strings.TrimSpace(email),
 		FirstName: strings.TrimSpace(firstName),
 		LastName:  strings.TrimSpace(lastName),
@@ -38,16 +41,16 @@ func NewUser(email, firstName, lastName, phone string) User {
 	}
 }
 func (u User) Validate() error {
-	if u.ID == "" {
+	if strings.TrimSpace(u.ID) == "" {
 		return ErrUserIDRequired
 	}
-	if u.Email == "" {
+	if strings.TrimSpace(u.Email) == "" {
 		return ErrUserEmailRequired
 	}
-	if u.FirstName == "" {
+	if strings.TrimSpace(u.FirstName) == "" {
 		return ErrUserFirsNameRequired
 	}
-	if u.LastName == "" {
+	if strings.TrimSpace(u.LastName) == "" {
 		return ErrUserLastNameRequired
 	}
 	return nil

@@ -10,27 +10,36 @@ import (
 )
 
 var (
-	ErrRegisterEmailRequired    = errors.New("register: email is required")
-	ErrRegisterPasswordRequired = errors.New("register: password is required")
-	ErrUserAlreadyExists        = errors.New("register: user already exists")
+	ErrRegisterEmailRequired     = errors.New("register: email is required")
+	ErrRegisterPasswordRequired  = errors.New("register: password is required")
+	ErrRegisterFirstNameRequired = errors.New("register: first name is required")
+	ErrRegisterLastNameRequired  = errors.New("register: last name is required")
+	ErrUserAlreadyExists         = errors.New("register: user already exists")
+	ErrUserProfileAlreadyExists  = errors.New("register: user profile already exists")
+	ErrUserProfileCreationFailed = errors.New("register: user profile creation failed")
 )
 
 type RegisterUserUseCase struct {
-	userRepo       ports.UserRepository
-	passwordHasher ports.PasswordHasher
+	userRepo           ports.UserRepository
+	passwordHasher     ports.PasswordHasher
+	userProfileCreator ports.UserProfileCreator
 }
 
-func NewRegisterUserUseCase(userRepo ports.UserRepository, passwordHasher ports.PasswordHasher) *RegisterUserUseCase {
+func NewRegisterUserUseCase(userRepo ports.UserRepository, passwordHasher ports.PasswordHasher, userProfileCreator ports.UserProfileCreator) *RegisterUserUseCase {
 	return &RegisterUserUseCase{
-		userRepo:       userRepo,
-		passwordHasher: passwordHasher,
+		userRepo:           userRepo,
+		passwordHasher:     passwordHasher,
+		userProfileCreator: userProfileCreator,
 	}
 }
 
 type RegisterUserInput struct {
-	ID       string
-	Email    string
-	Password string
+	ID        string
+	Email     string
+	Password  string
+	FirstName string
+	LastName  string
+	Phone     string
 }
 
 type RegisterUserOutput struct {
@@ -41,12 +50,21 @@ type RegisterUserOutput struct {
 func (uc *RegisterUserUseCase) Execute(ctx context.Context, input RegisterUserInput) (RegisterUserOutput, error) {
 	email := strings.TrimSpace(input.Email)
 	password := strings.TrimSpace(input.Password)
+	firstName := strings.TrimSpace(input.FirstName)
+	lastName := strings.TrimSpace(input.LastName)
+	phone := strings.TrimSpace(input.Phone)
 
 	if email == "" {
 		return RegisterUserOutput{}, ErrRegisterEmailRequired
 	}
 	if password == "" {
 		return RegisterUserOutput{}, ErrRegisterPasswordRequired
+	}
+	if firstName == "" {
+		return RegisterUserOutput{}, ErrRegisterFirstNameRequired
+	}
+	if lastName == "" {
+		return RegisterUserOutput{}, ErrRegisterLastNameRequired
 	}
 
 	// check existing user
@@ -73,6 +91,20 @@ func (uc *RegisterUserUseCase) Execute(ctx context.Context, input RegisterUserIn
 
 	if err := uc.userRepo.Save(ctx, user); err != nil {
 		return RegisterUserOutput{}, err
+	}
+
+	if err := uc.userProfileCreator.Create(ctx, ports.UserProfile{
+		ID:        user.ID,
+		Email:     user.Email,
+		FirstName: firstName,
+		LastName:  lastName,
+		Phone:     phone,
+	}); err != nil {
+		_ = uc.userRepo.Delete(ctx, user.ID)
+		if errors.Is(err, ErrUserProfileAlreadyExists) {
+			return RegisterUserOutput{}, ErrUserProfileAlreadyExists
+		}
+		return RegisterUserOutput{}, ErrUserProfileCreationFailed
 	}
 
 	return RegisterUserOutput{

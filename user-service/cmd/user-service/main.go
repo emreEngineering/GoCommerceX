@@ -6,12 +6,12 @@ import (
 	"log"
 	"net"
 
+	"GoCommerceX/proto/user/v1"
 	"GoCommerceX/user-service/internal/adapters"
 	"GoCommerceX/user-service/internal/application"
 	"GoCommerceX/user-service/internal/config"
 	"GoCommerceX/user-service/internal/infrastructure"
 	grpchandler "GoCommerceX/user-service/internal/transport/grpc"
-	"GoCommerceX/proto/user/v1"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"

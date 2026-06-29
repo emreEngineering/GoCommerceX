@@ -19,6 +19,7 @@ var (
 
 // Girdi
 type CreateUserInput struct {
+	ID        string
 	Email     string
 	FirstName string
 	LastName  string
@@ -67,7 +68,7 @@ func (uc *CreateUserUseCase) Execute(ctx context.Context, input CreateUserInput)
 	}
 
 	// Domain objesi oluştur
-	user := domain.NewUser(email, firstName, lastName, phone)
+	user := domain.NewUser(input.ID, email, firstName, lastName, phone)
 	if err := user.Validate(); err != nil {
 		return CreateUserOutput{}, err
 	}

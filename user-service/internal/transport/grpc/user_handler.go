@@ -5,8 +5,8 @@ import (
 	"errors"
 	"log"
 
-	"GoCommerceX/user-service/internal/application"
 	"GoCommerceX/proto/user/v1"
+	"GoCommerceX/user-service/internal/application"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -14,11 +14,11 @@ import (
 
 type UserHandler struct {
 	userv1.UnimplementedUserServiceServer
-	createUserUseCase       *application.CreateUserUseCase
-	getUserUseCase          *application.GetUserUseCase
-	getUserByEmailUseCase   *application.GetUserByEmailUseCase
-	updateUserUseCase       *application.UpdateUserUseCase
-	deleteUserUseCase       *application.DeleteUserUseCase
+	createUserUseCase     *application.CreateUserUseCase
+	getUserUseCase        *application.GetUserUseCase
+	getUserByEmailUseCase *application.GetUserByEmailUseCase
+	updateUserUseCase     *application.UpdateUserUseCase
+	deleteUserUseCase     *application.DeleteUserUseCase
 }
 
 func NewUserHandler(
@@ -29,16 +29,17 @@ func NewUserHandler(
 	deleteUserUseCase *application.DeleteUserUseCase,
 ) *UserHandler {
 	return &UserHandler{
-		createUserUseCase:       createUserUseCase,
-		getUserUseCase:          getUserUseCase,
-		getUserByEmailUseCase:   getUserByEmailUseCase,
-		updateUserUseCase:       updateUserUseCase,
-		deleteUserUseCase:       deleteUserUseCase,
+		createUserUseCase:     createUserUseCase,
+		getUserUseCase:        getUserUseCase,
+		getUserByEmailUseCase: getUserByEmailUseCase,
+		updateUserUseCase:     updateUserUseCase,
+		deleteUserUseCase:     deleteUserUseCase,
 	}
 }
 
 func (h *UserHandler) CreateUser(ctx context.Context, req *userv1.CreateUserRequest) (*userv1.CreateUserResponse, error) {
 	input := application.CreateUserInput{
+		ID:        req.GetId(),
 		Email:     req.GetEmail(),
 		FirstName: req.GetFirstName(),
 		LastName:  req.GetLastName(),
