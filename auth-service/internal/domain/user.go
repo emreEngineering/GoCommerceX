@@ -3,6 +3,7 @@ package domain
 import (
 	"errors"
 	"time"
+	"strings"
 
 	"github.com/google/uuid"
 )
@@ -33,13 +34,13 @@ func NewUser(email, passwordHash string) User {
 }
 
 func (u User) Validate() error {
-	if u.ID == "" {
+	if strings.TrimSpace(u.ID) == "" {
 		return ErrUserIDRequired
 	}
-	if u.Email == "" {
+	if strings.TrimSpace(u.Email) == "" {
 		return ErrUserEmailRequired
 	}
-	if u.PasswordHash == "" {
+	if strings.TrimSpace(u.PasswordHash) == "" {
 		return ErrPasswordHashRequired
 	}
 	return nil

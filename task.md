@@ -34,6 +34,7 @@ Kapsanan konular:
 |--------|-------|-----------|-----|
 | **Auth Service** | ✅ Çalışıyor | 50051 | `phase-02.12-auth-service-runnable` |
 | **User Service** | ✅ Çalışıyor | 50052 | `phase-03.01-user-service-runnable` |
+| **Product Service** | ✅ Geliştirildi | 50053 | - |
 
 ### Auth Service Detay
 - **Metodlar:** Register, Login
@@ -55,7 +56,7 @@ Kapsanan konular:
 - **Proto tanımları:** 8 `.proto` dosyası var, sadece `auth.proto` ve `user.proto` için Go kodu üretildi.
 
 ### Bekleyen Servisler
-- Product, Inventory, Cart, Order, Payment, Notification, API Gateway (sadece boş klasörler var)
+- Inventory, Cart, Order, Payment, Notification, API Gateway (sadece boş klasörler var)
 
 ---
 
@@ -90,7 +91,7 @@ GoCommerceX/
 │ └── infrastructure/migrate.go
 └── (diğer boş servis klasörleri)
 
-text
+
 
 ---
 
@@ -105,16 +106,15 @@ text
 
 ## 6. Sıradaki Adımlar (Önerilen)
 
-1. Product Service (ürün yönetimi)
-2. Servisler arası iletişim (Auth → User gRPC çağrısı)
-3. Inventory Service (stok)
-4. Cart Service (Redis ile sepet)
-5. Order + Payment + Notification (sipariş akışı)
-6. API Gateway
+1. Servisler arası iletişim (Auth → User gRPC çağrısı)
+2. Inventory Service (stok)
+3. Cart Service (Redis ile sepet)
+4. Order + Payment + Notification (sipariş akışı)
+5. API Gateway
 
 ---
 
 ## 7. Yeni Konuşma Başlatma Komutu
 
 > GoCommerceX projesine devam et. `task.md` dosyasını oku, `main` branch'teyiz.
-> Auth Service (50051) ve User Service (50052) çalışıyor. Sıradaki adım Product Service.
+> Auth Service (50051), User Service (50052) ve Product Service (50053) hazır. Sıradaki adım servisler arası iletişim.

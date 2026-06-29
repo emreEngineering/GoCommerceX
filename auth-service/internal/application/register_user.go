@@ -28,6 +28,7 @@ func NewRegisterUserUseCase(userRepo ports.UserRepository, passwordHasher ports.
 }
 
 type RegisterUserInput struct {
+	ID       string
 	Email    string
 	Password string
 }
@@ -63,6 +64,9 @@ func (uc *RegisterUserUseCase) Execute(ctx context.Context, input RegisterUserIn
 	}
 
 	user := domain.NewUser(email, hashedPassword)
+	if trimmedID := strings.TrimSpace(input.ID); trimmedID != "" {
+		user.ID = trimmedID
+	}
 	if err := user.Validate(); err != nil {
 		return RegisterUserOutput{}, err
 	}

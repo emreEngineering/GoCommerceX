@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"GoCommerceX/auth-service/internal/domain"
+	"GoCommerceX/auth-service/internal/ports"
 )
 
 type fakeUserRepository struct {
@@ -39,7 +40,7 @@ func (r *fakeUserRepository) FindByEmail(ctx context.Context, email string) (dom
 
 	user, ok := r.usersByEmail[email]
 	if !ok {
-		return domain.User{}, errors.New("user not found")
+		return domain.User{}, ports.ErrUserNotFound
 	}
 
 	return user, nil
