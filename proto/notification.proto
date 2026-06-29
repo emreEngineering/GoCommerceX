@@ -4,4 +4,37 @@ package notification.v1;
 
 option go_package = "GoCommerceX/proto/notification/v1;notificationv1";
 
-service NotificationService {}
+service NotificationService {
+  rpc SendNotification(SendNotificationRequest) returns (SendNotificationResponse);
+  rpc GetNotification(GetNotificationRequest) returns (GetNotificationResponse);
+}
+
+message Notification {
+  string id = 1;
+  string order_id = 2;
+  string user_id = 3;
+  string type = 4;
+  string message = 5;
+  string status = 6;
+  string created_at = 7;
+  string updated_at = 8;
+}
+
+message SendNotificationRequest {
+  string order_id = 1;
+  string user_id = 2;
+  string type = 3;
+  string message = 4;
+}
+
+message SendNotificationResponse {
+  Notification notification = 1;
+}
+
+message GetNotificationRequest {
+  string id = 1;
+}
+
+message GetNotificationResponse {
+  Notification notification = 1;
+}

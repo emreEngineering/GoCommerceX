@@ -4,4 +4,43 @@ package order.v1;
 
 option go_package = "GoCommerceX/proto/order/v1;orderv1";
 
-service OrderService {}
+service OrderService {
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
+  rpc GetOrder(GetOrderRequest) returns (GetOrderResponse);
+  rpc CancelOrder(CancelOrderRequest) returns (CancelOrderResponse);
+}
+
+message Order {
+  string id = 1;
+  string user_id = 2;
+  string payment_id = 3;
+  string status = 4;
+  double total_amount = 5;
+  string created_at = 6;
+  string updated_at = 7;
+}
+
+message CreateOrderRequest {
+  string user_id = 1;
+  double total_amount = 2;
+}
+
+message CreateOrderResponse {
+  Order order = 1;
+}
+
+message GetOrderRequest {
+  string id = 1;
+}
+
+message GetOrderResponse {
+  Order order = 1;
+}
+
+message CancelOrderRequest {
+  string id = 1;
+}
+
+message CancelOrderResponse {
+  Order order = 1;
+}

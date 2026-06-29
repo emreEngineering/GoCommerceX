@@ -37,6 +37,9 @@ Kapsanan konular:
 | **Product Service** | ✅ Geliştirildi | 50053 | - |
 | **Inventory Service** | ✅ Geliştirildi | 50054 | - |
 | **Cart Service** | ✅ Geliştirildi | 50055 | - |
+| **Order Service** | ✅ Geliştirildi | 50056 | - |
+| **Payment Service** | ✅ Geliştirildi | 50057 | - |
+| **Notification Service** | ✅ Geliştirildi | 50058 | - |
 
 ### Auth Service Detay
 - **Metodlar:** Register, Login
@@ -57,10 +60,10 @@ Kapsanan konular:
 ### Altyapı
 - **Docker Compose:** PostgreSQL (5432), Redis (6379), RabbitMQ (5672, 15672)
 - **Veritabanı:** PostgreSQL, kullanıcı: `gocommerce`, şifre: `gocommerce_password`, db: `gocommerce`
-- **Proto tanımları:** 10 `.proto` dosyası var, `auth.proto`, `user.proto`, `product.proto`, `inventory.proto` ve `cart.proto` için Go kodu üretildi.
+- **Proto tanımları:** 13 `.proto` dosyası var, `auth.proto`, `user.proto`, `product.proto`, `inventory.proto`, `cart.proto`, `order.proto`, `payment.proto` ve `notification.proto` için Go kodu üretildi.
 
 ### Bekleyen Servisler
-- Order, Payment, Notification, API Gateway (sadece boş klasörler var)
+- API Gateway (sadece boş klasörler var)
 
 ---
 
@@ -110,13 +113,11 @@ GoCommerceX/
 
 ## 6. Sıradaki Adımlar (Önerilen)
 
-1. Inventory Service (stok)
-2. Order + Payment + Notification (sipariş akışı)
-3. API Gateway
+1. API Gateway
 
 ---
 
 ## 7. Yeni Konuşma Başlatma Komutu
 
 > GoCommerceX projesine devam et. `task.md` dosyasını oku, `main` branch'teyiz.
-> Auth Service (50051), User Service (50052), Product Service (50053), Inventory Service (50054) ve Cart Service (50055) hazır. Auth register akışı artık User Service'e gRPC çağrısı yapıyor. Sıradaki adım Order + Payment + Notification akışı.
+> Auth Service (50051), User Service (50052), Product Service (50053), Inventory Service (50054), Cart Service (50055), Order Service (50056), Payment Service (50057) ve Notification Service (50058) hazır. Auth register akışı artık User Service'e gRPC çağrısı yapıyor. Sıradaki adım API Gateway.
