@@ -4,4 +4,76 @@ package cart.v1;
 
 option go_package = "GoCommerceX/proto/cart/v1;cartv1";
 
-service CartService {}
+service CartService {
+  rpc CreateCart(CreateCartRequest) returns (CreateCartResponse);
+  rpc GetCart(GetCartRequest) returns (GetCartResponse);
+  rpc AddItem(AddItemRequest) returns (AddItemResponse);
+  rpc RemoveItem(RemoveItemRequest) returns (RemoveItemResponse);
+  rpc ClearCart(ClearCartRequest) returns (ClearCartResponse);
+  rpc DeleteCart(DeleteCartRequest) returns (DeleteCartResponse);
+}
+
+message CartItem {
+  string product_id = 1;
+  int32 quantity = 2;
+}
+
+message Cart {
+  string id = 1;
+  string user_id = 2;
+  repeated CartItem items = 3;
+  int32 total_quantity = 4;
+  string created_at = 5;
+  string updated_at = 6;
+}
+
+message CreateCartRequest {
+  string user_id = 1;
+}
+
+message CreateCartResponse {
+  Cart cart = 1;
+}
+
+message GetCartRequest {
+  string user_id = 1;
+}
+
+message GetCartResponse {
+  Cart cart = 1;
+}
+
+message AddItemRequest {
+  string user_id = 1;
+  string product_id = 2;
+  int32 quantity = 3;
+}
+
+message AddItemResponse {
+  Cart cart = 1;
+}
+
+message RemoveItemRequest {
+  string user_id = 1;
+  string product_id = 2;
+}
+
+message RemoveItemResponse {
+  Cart cart = 1;
+}
+
+message ClearCartRequest {
+  string user_id = 1;
+}
+
+message ClearCartResponse {
+  Cart cart = 1;
+}
+
+message DeleteCartRequest {
+  string user_id = 1;
+}
+
+message DeleteCartResponse {
+  bool success = 1;
+}
