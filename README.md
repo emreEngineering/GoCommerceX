@@ -1,26 +1,78 @@
+# AI ile Öğrenilen Kapsamlı Yolculuk
+
+## Tag Bazlı Gelişim Özeti
+
+Bu depo, AI ile adım adım ilerleyerek geliştirilen bir öğrenme projesidir. Aşağıdaki etiketler, yolculuğun ana dönüm noktalarını gösterir:
+
+| Tag | Öğrenilen / Tamamlanan Konu |
+|---|---|
+| `phase-01.00-baseline` | İlk proje temeli ve başlangıç yapısı |
+| `phase-01.01-monorepo-structure` | Monorepo klasör düzeni |
+| `phase-01.02-docker-compose-foundation` | PostgreSQL, Redis ve RabbitMQ ile compose altyapısı |
+| `phase-01.03-proto-foundation` | Proto dosyaları ve gRPC temel düzeni |
+| `phase-01.04-documentation-foundation` | Proje dokümantasyonunun ilk güçlü hali |
+| `phase-01.05-ide-cleanup` | Çalışma alanı ve IDE düzeni |
+| `phase-02.01-auth-service-skeleton` | Auth servis iskeleti |
+| `phase-02.02-auth-domain-model` | Domain model tasarımı |
+| `phase-02.03-auth-domain-validation` | Domain doğrulama kuralları |
+| `phase-02.04-auth-ports` | Hexagonal ports tasarımı |
+| `phase-02.05-auth-register-use-case` | Register use case |
+| `phase-02.06-auth-register-use-case-tests` | Register testleri |
+| `phase-02.07-auth-login-use-case` | Login use case |
+| `phase-02.08-auth-login-use-case-tests` | Login testleri |
+| `phase-02.09-bcrypt-password-hasher` | Şifre hashleme adaptörü |
+| `phase-02.10-jwt-token-generator` | JWT üretimi |
+| `phase-02.11-grpc-auth-handler` | gRPC handler entegrasyonu |
+| `phase-02.12-auth-service-runnable` | Auth servisinin çalışır hale gelmesi |
+| `phase-03.01-user-service-runnable` | User servisinin çalışır hale gelmesi |
+| `phase-03.02-product-service-runnable` | Product servisinin çalışır hale gelmesi |
+| `phase-03.03-auth-user-grpc-communication-runnable` | Auth ve User arasında gRPC iletişimi |
+| `phase-03.04-inventory-service-runnable` | Inventory servisinin çalışır hale gelmesi |
+| `phase-03.05-cart-service-runnable` | Cart servisinin Redis ile çalışması |
+| `phase-03.06-order-payment-notification-runnable` | Order, Payment ve Notification servislerinin birlikte çalışması |
+| `phase-04.01-api-gateway-complete` | API Gateway tamamlanması |
+
+## Öğrenilen Ana Temalar
+
+- Monorepo ve servis sınırları
+- Hexagonal Architecture
+- Domain, application, ports ve adapters ayrımı
+- gRPC ile servisler arası iletişim
+- PostgreSQL ve Redis ile veri sahipliği
+- RabbitMQ ile olay tabanlı iletişim
+- Docker Compose ile çoklu servis orkestrasyonu
+- Tek ortak Dockerfile ile build standardizasyonu
+- Container runtime içinde dosya ve migration yönetimi
+- `docker compose config` ile doğrulama alışkanlığı
+
+## En Önemli Ders
+
+- Build tamamlanmış olsa bile runtime image içinde ihtiyaç duyulan dosyalar yoksa servis yine çöker.
+- Bu yüzden uygulama kodu, Dockerfile, compose ve veri/migration path’leri birlikte düşünülmelidir.
+
 # GoCommerceX
 
-GoCommerceX is a learning-focused commerce backend platform built with Go, Hexagonal Architecture, Microservices, and gRPC.
+GoCommerceX, Go ile geliştirilmiş; Hexagonal Architecture, Microservice Architecture ve gRPC temelli öğrenme odaklı bir commerce backend platformudur.
 
-## Purpose
+## Amaç
 
-The purpose of this project is to learn and practice modern backend concepts through a realistic commerce platform.
+Bu projenin amacı, gerçekçi bir commerce platformu üzerinden modern backend geliştirme pratiklerini öğrenmek ve uygulamaktır.
 
-Main learning goals:
+Ana öğrenme hedefleri:
 
-- Go backend development
+- Go backend geliştirme
 - Hexagonal Architecture
 - Microservice Architecture
-- gRPC communication
+- gRPC iletişimi
 - Protocol Buffers
 - PostgreSQL
 - Redis
 - RabbitMQ
 - JWT authentication
 - Docker Compose
-- Testing, logging, and health checks
+- Test, logging ve health check
 
-## Services
+## Servisler
 
 - API Gateway
 - Auth Service
@@ -32,22 +84,22 @@ Main learning goals:
 - Payment Service
 - Notification Service
 
-## Current Phase
+## Mevcut Faz
 
-Phase 01: Project Foundation
+Faz 01: Proje Temeli
 
-Completed steps:
+Tamamlanan adımlar:
 
 - 01.00 Baseline
 - 01.01 Monorepo Structure
 - 01.02 Docker Compose Foundation
 - 01.03 Proto Foundation
 
-Current step:
+Güncel adım:
 
 - 01.04 Project Documentation Foundation
 
-## Project Structure
+## Proje Yapısı
 
 ```text
 GoCommerceX/
@@ -69,35 +121,56 @@ GoCommerceX/
 └── task.md
 ```
 
-## Infrastructure
+## Altyapı
 
-The local infrastructure is defined in:
+Yerel altyapı şu dosyada tanımlıdır:
 
 ```text
 deployments/docker-compose.yml
 ```
 
-It includes:
+İçerdiği servisler:
 
 - PostgreSQL
 - Redis
-- RabbitMQ with Management UI
+- RabbitMQ ve yönetim arayüzü
 
-To validate the Docker Compose file:
+Docker Compose dosyasını doğrulamak için:
 
 ```bash
 docker compose --env-file .env.example -f deployments/docker-compose.yml config
 ```
 
-## Git Progress Tags
+## Git İlerleme Etiketleri
 
 - `phase-01.00-baseline`
 - `phase-01.01-monorepo-structure`
 - `phase-01.02-docker-compose-foundation`
 - `phase-01.03-proto-foundation`
+- `phase-01.04-documentation-foundation`
+- `phase-01.05-ide-cleanup`
+- `phase-02.01-auth-service-skeleton`
+- `phase-02.02-auth-domain-model`
+- `phase-02.03-auth-domain-validation`
+- `phase-02.04-auth-ports`
+- `phase-02.05-auth-register-use-case`
+- `phase-02.06-auth-register-use-case-tests`
+- `phase-02.07-auth-login-use-case`
+- `phase-02.08-auth-login-use-case-tests`
+- `phase-02.09-bcrypt-password-hasher`
+- `phase-02.10-jwt-token-generator`
+- `phase-02.11-grpc-auth-handler`
+- `phase-02.12-auth-service-runnable`
+- `phase-03.01-user-service-runnable`
+- `phase-03.02-product-service-runnable`
+- `phase-03.03-auth-user-grpc-communication-runnable`
+- `phase-03.04-inventory-service-runnable`
+- `phase-03.05-cart-service-runnable`
+- `phase-03.06-order-payment-notification-runnable`
+- `phase-04.01-api-gateway-complete`
 
-## Development Rule
+## Geliştirme Kuralı
 
-Each service owns its own data.
+Her servis kendi verisine sahiptir.
 
-A service must not connect directly to another service's database. Communication between services should happen through gRPC or events.
+Bir servis başka bir servisin veritabanına doğrudan bağlanmamalıdır. Servisler arası iletişim gRPC veya event mekanizması ile yapılmalıdır.

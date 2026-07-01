@@ -1,5 +1,147 @@
 
 
+# 0.  AI ile Öğrenilen Kapsamlı Yolculuk – Tag Bazlı Teknik Notlar
+
+---
+
+###  Bu Notların Amacı
+
+Bu dosya, GoCommerceX projesinde AI ile birlikte ilerlerken öğrendiğimiz ana konuları tag akışına göre özetler.
+
+- Phase 01: proje temeli, monorepo, compose, proto ve dokümantasyon
+- Phase 02: Auth Service, domain, ports, use case, test ve gRPC
+- Phase 03: diğer servislerin ayağa kaldırılması ve servisler arası iletişim
+- Phase 04: API Gateway tamamlanması
+
+---
+
+###  Tek Ortak Dockerfile
+
+**Ne demek?** Aynı Go monorepo içinde tüm servisleri tek bir `Dockerfile` ile build edebilmek.
+
+**Projedeki örnek:**
+```text
+Dockerfile
+```
+
+Bu projede her servis için ayrı Dockerfile yazmak yerine tek bir ortak Dockerfile kullandık. Build sırasında:
+
+- `SERVICE_PATH` ile servis klasörü seçiliyor
+- `SERVICE_NAME` ile `cmd` altındaki giriş noktası belirleniyor
+- `go mod download` ile bağımlılıklar hazırlanıyor
+- servis binary’si oluşturuluyor
+
+Bu yaklaşım compose dosyasını sadeleştirir ve yeni servis eklemeyi kolaylaştırır.
+
+---
+
+###  Docker Compose ile Çoklu Servis Ayağa Kaldırma
+
+**Ne demek?** Uygulama servisleri ve altyapı servislerini tek komutla birlikte çalıştırmak.
+
+**Projedeki örnek:**
+```yaml
+services:
+  postgres:
+  redis:
+  rabbitmq:
+  api-gateway:
+  auth-service:
+  user-service:
+  product-service:
+  inventory-service:
+  cart-service:
+  order-service:
+  payment-service:
+  notification-service:
+```
+
+Compose tarafında her servis için:
+
+- `build.context`
+- `build.args`
+- `ports`
+- `environment`
+- `depends_on`
+
+tanımladık. Böylece servisler aynı ağ üzerinde birbirine isimle erişebiliyor:
+
+```text
+auth-service:50051
+user-service:50052
+postgres:5432
+redis:6379
+```
+
+---
+
+###  Runtime Image ve Migration Sorunu
+
+**Ne demek?** Build aşamasında var olan dosyaların runtime image içinde de gerçekten bulunması gerekir.
+
+**Yaşanan sorun:**
+
+Servisler açılırken şu tarz path'ler arıyordu:
+
+```text
+/src/auth-service/migrations/001_create_users_table.sql
+```
+
+Ama final image içinde sadece binary vardı. Bu yüzden migration okuma aşamasında servisler `file not found` hatası verdi.
+
+**Çözüm:**
+
+- Migration klasörlerini runtime image’a kopyaladık
+- Aynı dizin yapısını koruduk
+- Böylece servisler bekledikleri path’i bulabildi
+
+**Daha temiz alternatif:**
+
+- Migration SQL dosyalarını `go:embed` ile binary içine gömmek
+- Disk yoluna bağlı kalmamak
+
+---
+
+###  YAML İçinde Küçük Ama Kritik Detaylar
+
+**Ne demek?** Bazı değerler tırnaksız yazılınca YAML bunu yanlış yorumlayabilir.
+
+**Projedeki örnek:**
+```yaml
+CART_KEY_PREFIX: "cart:"
+```
+
+Şu kullanım hatalıydı:
+
+```yaml
+CART_KEY_PREFIX: cart:
+```
+
+Bu küçük yazım farkı `docker compose config` aşamasında YAML parse hatası üretti.  
+Yani Compose’ta syntax kontrolü yapmak çok önemli.
+
+---
+
+###  Compose Doğrulama Alışkanlığı
+
+**Ne demek?** Dosyayı yazdıktan sonra çalıştırmadan önce Compose konfigürasyonunu doğrulamak.
+
+**Projedeki komut:**
+```bash
+docker compose --env-file .env.example -f deployments/docker-compose.yml config
+```
+
+Bu komut bize şunları gösterdi:
+
+- Compose dosyası geçerli mi
+- Environment değişkenleri doğru mu
+- Servis isimleri ve portlar düzgün mü
+- `build` ayarları çözümlenmiş mi
+
+Bu kontrol sayesinde runtime hatalarını daha servis kalkmadan yakalayabildik.
+
+---
+
 # 1.  Mikroservis Mimarisi – Proje Örnekleri
 
 ---
