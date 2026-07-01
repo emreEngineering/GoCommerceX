@@ -25,7 +25,11 @@ func (r *PostgresOrderRepository) Save(ctx context.Context, order domain.Order) 
 		INSERT INTO orders (id, user_id, payment_id, status, total_amount, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
 	`
-	_, err := r.pool.Exec(ctx, query, order.ID, order.UserID, order.PaymentID, order.Status, order.TotalAmount, order.CreatedAt, order.UpdatedAt)
+	var paymentID any
+	if order.PaymentID != "" {
+		paymentID = order.PaymentID
+	}
+	_, err := r.pool.Exec(ctx, query, order.ID, order.UserID, paymentID, order.Status, order.TotalAmount, order.CreatedAt, order.UpdatedAt)
 	return err
 }
 
@@ -49,7 +53,11 @@ func (r *PostgresOrderRepository) Update(ctx context.Context, order domain.Order
 		WHERE id = $5
 	`
 	order.UpdatedAt = time.Now()
-	result, err := r.pool.Exec(ctx, query, order.PaymentID, order.Status, order.TotalAmount, order.UpdatedAt, order.ID)
+	var paymentID any
+	if order.PaymentID != "" {
+		paymentID = order.PaymentID
+	}
+	result, err := r.pool.Exec(ctx, query, paymentID, order.Status, order.TotalAmount, order.UpdatedAt, order.ID)
 	if err != nil {
 		return err
 	}
