@@ -1666,3 +1666,232 @@ mux.Handle("/api/user/profile", authMiddleware(http.HandlerFunc(getProfile)))
 ---
 
 Bu, projendeki **10 ana konunun tamamının** alt başlıklarıyla birlikte proje örnekleridir. İstersen bir konuyu derinleştirelim, istersen API Gateway'i tamamlamaya geçelim.
+
+---
+
+# 11.  Hata Ayıklama ve Test Disiplini – Projeden Çıkan Gerçek Dersler
+
+Bu bölüm, teoriden çok pratiği anlatır. Çünkü projeyi yazarken en çok öğrenilen şeyler genelde "çalışmayan yerler" sayesinde ortaya çıkar.
+
+---
+
+###  Önce Servisleri Durumlandırma
+
+Bir problemi çözerken ilk iş, hangi servisin ayakta olduğunu ve hangisinin yanlış davrandığını anlamaktır.
+
+**Uyguladığımız sıra:**
+1. Tüm servisleri durdur
+2. Tek tek yeniden ayağa kaldır
+3. Önce health check
+4. Sonra auth
+5. Ardından ürün, sepet ve sipariş akışı
+
+Bu yaklaşımın faydası şu:
+- Hata hangi serviste hemen belli olur
+- Loglar daha okunur hale gelir
+- Bir değişiklik başka yeri bozduysa daha kolay yakalanır
+
+---
+
+###  Doğru Çalıştırma Komutu
+
+Go projelerinde bazen sorun kodda değil, komutu yanlış dizinden çalıştırmaktır.
+
+**Yaşadığımız örnek:**
+```bash
+go run ./api-gateway/cmd/api-gateway
+```
+
+Bu komut doğru klasörden çalıştırılmadığında yanlış path oluşabilir ve şu tarz hatalar görülebilir:
+- `directory not found`
+- `missing port in address`
+
+Buradan çıkan ders:
+- Her zaman önce bulunduğun dizini kontrol et
+- Modül kökünden çalıştır
+- Config dosyasında port ve adres formatlarını doğrula
+
+---
+
+###  Port ve Address Kontrolü
+
+Bir servis "çalışıyor gibi" görünse bile yanlış port ile ayağa kalkmış olabilir.
+
+**Kontrol etmen gerekenler:**
+- `HTTP_PORT`
+- `GRPC_PORT`
+- `AUTH_ADDR`
+- `USER_ADDR`
+- `PRODUCT_ADDR`
+- `CART_ADDR`
+- `ORDER_ADDR`
+- `PAYMENT_ADDR`
+- `NOTIF_ADDR`
+
+Eğer API Gateway ayakta değilse önce:
+```bash
+curl http://localhost:8080/health
+```
+
+Eğer gRPC servisleri görünmüyorsa:
+```bash
+grpcurl -plaintext localhost:50051 list
+```
+
+Bu iki komut, sorunun HTTP tarafında mı gRPC tarafında mı olduğunu hızlıca ayırır.
+
+---
+
+###  Field Adı Uyuşmazlığı
+
+Bu projede en öğretici hatalardan biri, aynı anlamı taşıyan alan adlarının farklı katmanlarda farklı görünmesiydi.
+
+**Örnek problem:**
+- API Gateway `user_id` bekliyor
+- Cart Service ya da proto tarafı `userId` / `UserId` / `user_id` gibi farklı isimler kullanıyor
+- Sonuç olarak request doğru gibi görünse bile veri yanlış yere gidiyor
+
+**Çözüm mantığı:**
+- Dış istekten gelen alanları Gateway'de normalize et
+- Kullanıcı kimliğini body'den almak yerine JWT'den çıkar
+- Proto mesaj adlarını, Go struct alanlarını ve JSON field isimlerini ayrı ayrı düşün
+
+**Bu projedeki doğru yaklaşım:**
+- `user_id` body'den gelmesin
+- Gateway JWT'den `sub` claim'ini alsın
+- Cart request'i oluştururken `UserId` alanını gateway doldursun
+
+Bu, hem güvenlik hem de veri bütünlüğü açısından daha doğru.
+
+---
+
+###  UUID ve Boş String Problemi
+
+Sipariş akışında çok klasik ama çok can sıkıcı bir problem yaşanabilir:
+
+- Veritabanında alan `UUID`
+- Uygulama boş değer gönderiyor: `""`
+- PostgreSQL bunu UUID'e çeviremiyor
+
+**Belirti:**
+```text
+invalid input syntax for type uuid: ""
+```
+
+**Bu hata ne öğretir?**
+- `""` ile `NULL` aynı şey değildir
+- UUID alanına boş string gönderilmez
+- SQL tarafında nullable alanlar açıkça modellemelidir
+
+**Doğru yaklaşım:**
+- Go tarafında `sql.NullString` ya da nullable yapıyı kullan
+- Insert sırasında gerçekten değer yoksa `NULL` gönder
+- Gereksiz boş string üretme
+
+Bu proje bize şunu öğretti: veritabanı şeması ile Go struct'ı birebir aynı düşünülmez, arada dönüşüm katmanı gerekir.
+
+---
+
+###  Test Sırası
+
+Test ederken her şeyi aynı anda denemek yerine sırayla gitmek çok daha güvenlidir.
+
+**İyi test sırası:**
+1. `health`
+2. `register`
+3. `login`
+4. JWT ile `profile`
+5. JWT ile `product list`
+6. `add to cart`
+7. `get cart`
+8. `create order`
+9. `get order`
+
+Bu sırayı bozarsan, alttaki hata üstteki adımdan mı geliyor anlamak zorlaşır.
+
+---
+
+###  Sorun Çıktığında Bakılacak Yerler
+
+Bir işlem bozulduğunda şu sırayla kontrol etmek çok iş gördü:
+
+1. **Config**
+   - Env var doğru mu?
+   - Port doğru mu?
+   - Secret doğru mu?
+
+2. **Proto**
+   - Field adı doğru mu?
+   - Request/response alanı eşleşiyor mu?
+   - Generate edilmiş kod güncel mi?
+
+3. **Handler**
+   - HTTP veya gRPC request doğru parse ediliyor mu?
+   - JWT context doğru okunuyor mu?
+
+4. **Use case**
+   - İş kuralı doğru mu?
+   - Validation doğru çalışıyor mu?
+
+5. **Repository**
+   - SQL sorgusu doğru mu?
+   - UUID/nullable tipler doğru mu?
+
+6. **Service bağımlılıkları**
+   - Diğer servis açık mı?
+   - Address doğru mu?
+
+Bu kontrol listesi, hata ayıklamayı tahmin oyunundan çıkarıyor.
+
+---
+
+###  Projeden Öğrenilen En Önemli Alışkanlıklar
+
+Bu projede teknik olarak çok şey öğrenildi ama birkaç alışkanlık daha değerli:
+
+- Önce küçük parçayı çalıştır
+- Sonra entegrasyonu ekle
+- Hata mesajını dikkatle oku
+- Proto ve DB şemasını ayrı ayrı doğrula
+- Testi uçtan uca yapmadan "tamamdır" deme
+
+---
+
+###  Gerçek Hayat İçin Kısa Notlar
+
+Bu proje şunu net gösterdi:
+
+- Mikroservis kolay değil, ama düzenli olunca yönetilebilir
+- gRPC hızlıdır, fakat sözleşme disiplini ister
+- JWT güvenlik için güçlüdür, ama doğru middleware olmadan eksik kalır
+- PostgreSQL ve Redis farklı amaçlar içindir, ikisini karıştırmamak gerekir
+- API Gateway, dış dünya ile iç servisler arasında temiz bir sınır oluşturur
+
+---
+
+##  Final Öğrenme Özeti
+
+Bu projeyi yazarken öğrendiğim ana şey şu:
+
+> Her katman kendi işini yaparsa sistem büyürken bozulmaz.
+
+Domain iş kuralını bilir, application akışı bilir, ports neye ihtiyaç olduğunu söyler, adapters dış dünyayla konuşur, transport isteği alır, gateway ise dış dünya ile servisler arasında çeviri yapar.
+
+Bir hata çıktığında bu katmanlardan hangisinin kuralı bozduğunu bulmak, problemi çözmenin en doğru yoludur.
+
+---
+
+##  İleride Bakılacak Konular
+
+Bu projeyi daha ileri taşımak için öğrenmeye devam edilebilecek başlıklar:
+
+- gRPC interceptor yazımı
+- gRPC client retry ve timeout stratejileri
+- Redis cache invalidation
+- RabbitMQ dead-letter queue
+- Docker Compose ile servisleri tek komutta ayağa kaldırma
+- CI/CD pipeline kurulumu
+- OpenTelemetry ile distributed tracing
+- SQL transaction ve saga desenleri
+
+Bu not, sadece ne yaptığını değil, neden yaptığını da hatırlatmak için burada dursun.
